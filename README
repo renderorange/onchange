@@ -1,0 +1,61 @@
+NAME
+    watch - run commands when files change
+
+SYNOPSIS
+     watch <command> [--help]
+
+DESCRIPTION
+    "watch" is a program that watches for changes to files and directories
+    then runs configured sets of commands.
+
+    "watch" detects changes recursively from the current working directory.
+    Commands and files and directories to ignore are read from the ".watch"
+    file within the current working directory.
+
+OPTIONS
+    --help
+        Print the help menu.
+
+CONFIGURATION
+  ignore
+    The "ignore" section key.
+
+    Keys within this section define additional file or directory names to
+    ignore.
+
+    Multiple file or directory names can be defined per line if separated by
+    comma.
+
+  command
+    The "command" section key.
+
+    Keys within this section define what command to run when that command
+    argument is passed.
+
+  EXAMPLES
+    Automatically build and install a Perl module after editing
+         # create a .watch configuration file in the directory to watch
+         ~/git/bestpractical/bps/rt-extension-mandatoryontransition (add-config-verification) $ vi .watch
+         [ignore]
+         dirs=blib, tmp
+         files=pm_to_blib, scratch
+
+         [command]
+         install=sudo make && sudo make install
+
+         # start the watcher to run the commands defined within "install" on any file recursively within the cwd
+         ~/git/bestpractical/bps/rt-extension-mandatoryontransition (add-config-verification) $ watch install
+         [1617569718][ignore]: blib,tmp
+         [1617569718][ignore]: pm_to_blib,scratch
+         [1617569718][watch]: /home/blaine/git/bestpractical/bps/rt-extension-mandatoryontransition
+
+         # after modifying the file, MandatoryOnTransition.pm, the "install" command is run
+
+         [1617569728][modify]: /home/blaine/git/bestpractical/bps/rt-extension-mandatoryontransition/lib/RT/Extension/MandatoryOnTransition.pm
+         [1617569728][run install]: sudo make && sudo make install
+         cp lib/RT/Extension/MandatoryOnTransition/Test.pm blib/lib/RT/Extension/MandatoryOnTransition/Test.pm
+         cp lib/RT/Extension/MandatoryOnTransition.pm blib/lib/RT/Extension/MandatoryOnTransition.pm
+         cp lib/RT/Extension/MandatoryOnTransition/Test.pm.in blib/lib/RT/Extension/MandatoryOnTransition/Test.pm.in
+         Manifying blib/man3/RT::Extension::MandatoryOnTransition.3
+         Appending installation info to /home/blaine/src/rts/rt50-trunk_sqlite/local/plugins/RT-Extension-MandatoryOnTransition/lib/perllocal.pod
+
