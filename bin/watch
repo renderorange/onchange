@@ -128,9 +128,12 @@ watch - run commands when files change
 
 =head1 DESCRIPTION
 
-C<watch> is a program that watches for changes to files and directories then runs configured sets of commands.
+C<watch> is a program that watches for changes to files and directories
+then runs configured sets of commands.
 
-C<watch> detects changes recursively from the current working directory.  Files/directories to ignore and commands to run are read from the C<.watch> file within the current working directory.
+C<watch> detects changes recursively within the current working directory.
+Files/directories to ignore and commands to run are read from the C<.watch>
+file within the current working directory.
 
 =head1 OPTIONS
 
@@ -148,87 +151,65 @@ Print the help menu.
 
 The C<ignore> section key.
 
-Keys within this section define additional file or directory names to ignore.
+Keys within this section define additional file or directory names to
+ignore.
 
-Multiple file or directory names can be defined per line if separated by comma.
+Multiple file or directory names can be defined per line if separated by
+comma.
 
  [ignore]
- dirs=blib, tmp
- files=pm_to_blib, scratch
+ dirs=tmp, t
+ files=scratch, testing
 
 =head2 command
 
 The C<command> section key.
 
-Keys within this section define what command to run when that command argument is passed.
+Keys within this section define what command to run when that command
+argument is passed.
 
  [command]
- install=sudo make && sudo make install
- dir_list=ls -lah
- date=date
+ example=echo 'this is an example command'
+ another_example=echo 'this is another example command'
 
-Defined commands are run as arguments to C<watch>.  Multiple commands are run in the order they're passed.
+Defined commands are run as arguments to C<watch>.  Multiple commands are
+run in the order they're passed.
 
- $ watch install dir_list date
- (will run install, then dir_list, then date)
+ $ watch example another_example
+ (will run example, then another_example)
 
 =head2 EXAMPLES
 
-=over
-
-=item Automatically build and install a Perl module after editing
+=head3 Run two commands when changes are detected
 
  # create a .watch file in the directory to watch
- ~/git/bestpractical/bps/rt-extension-mandatoryontransition (add-config-verification) $ vi .watch
+ ~/git/example $ vi .watch
  [ignore]
- dirs=blib, tmp
- files=pm_to_blib, scratch
+ dirs=tmp, t
+ files=scratch, testing
 
  [command]
- install=sudo make && sudo make install
-
- # run watch with the "install" argument to run "sudo make && sudo make install" when files or dirs change
- ~/git/bestpractical/bps/rt-extension-mandatoryontransition (add-config-verification) $ watch install
- [1617569718][ignore]: blib,tmp
- [1617569718][ignore]: pm_to_blib,scratch
- [1617569718][watch]: /home/blaine/git/bestpractical/bps/rt-extension-mandatoryontransition
-
- # after modifying the file, MandatoryOnTransition.pm, the "install" command is run
-
- [1617569728][modify]: /home/blaine/git/bestpractical/bps/rt-extension-mandatoryontransition/lib/RT/Extension/MandatoryOnTransition.pm
- [1617569728][run install]: sudo make && sudo make install
- cp lib/RT/Extension/MandatoryOnTransition/Test.pm blib/lib/RT/Extension/MandatoryOnTransition/Test.pm
- cp lib/RT/Extension/MandatoryOnTransition.pm blib/lib/RT/Extension/MandatoryOnTransition.pm
- cp lib/RT/Extension/MandatoryOnTransition/Test.pm.in blib/lib/RT/Extension/MandatoryOnTransition/Test.pm.in
- Manifying blib/man3/RT::Extension::MandatoryOnTransition.3
- Appending installation info to /home/blaine/src/rts/rt50-trunk_sqlite/local/plugins/RT-Extension-MandatoryOnTransition/lib/perllocal.pod
-
-=item Run multiple commands when changes are detected
-
- # add three more commands to the .watch file
- ~/git/bestpractical/bps/rt-extension-mandatoryontransition (add-config-verification) $ vi .watch
- [ignore]
- dirs=blib, tmp
- files=pm_to_blib, scratch
-
- [command]
- install=sudo make && sudo make install
  example=echo 'this is an example command'
  another_example=echo 'this is another example command'
- date=date
 
- blaine@cyon ~/git/bestpractical/bps/rt-extension-mandatoryontransition (master) $ watch example another_example date
- [1617573990][ignore]: pm_to_blib,scratch
- [1617573990][ignore]: blib,tmp
- [1617573990][watch]: /home/blaine/git/bestpractical/bps/rt-extension-mandatoryontransition
- [1617574000][modify]: /home/blaine/git/bestpractical/bps/rt-extension-mandatoryontransition/lib/RT/Extension/MandatoryOnTransition.pm
- [1617574000][run example]: echo 'this is an example command'
+ # run watch, specifying both commands to run as defined in the .watch file
+  ~/git/example $ watch example another_example
+ [1617588530][ignore]: scratch,testing
+ [1617588530][ignore]: tmp,t
+ [1617588530][watch]: /home/blaine/git/example
+
+ # when any non-ignored files or directories change (or new are created),
+ # each of the specified commands are run.
+
+ [1617588661][modify]: /home/blaine/git/example/lib/example.pm
+ [1617588661][run example]: echo 'this is an example command'
  this is an example command
- [1617574000][run another_example]: echo 'this is another example command'
+ [1617588661][run another_example]: echo 'this is another example command'
  this is another example command
- [1617574000][run date]: date
- Sun Apr  4 17:06:40 CDT 2021
-
-=back
+ [1617588707][create]: /home/blaine/git/example/puppies
+ [1617588707][run example]: echo 'this is an example command'
+ this is an example command
+ [1617588707][run another_example]: echo 'this is another example command'
+ this is another example command
 
 =cut
