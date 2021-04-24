@@ -2,17 +2,26 @@ NAME
     watch - run commands when files change
 
 SYNOPSIS
-     watch <command> [--help]
+     watch [--run <command>]
+           [--help]
 
 DESCRIPTION
     "watch" is a program that watches for changes to files and directories
     then runs configured sets of commands.
 
-    "watch" detects changes recursively within the current working directory.
-    Files/directories to ignore and commands to run are read from the ".watch"
-    file within the current working directory.
+    "watch" detects changes recursively within the current working
+    directory. Files/directories to ignore and commands to run are read from
+    the ".watch" file within the current working directory.
 
 OPTIONS
+    --run <command>
+        Defines which commands to run on changes.
+
+        The "command" specified must be defined in the ".watch"
+        configuration file.
+
+        Multiple "--run" options may be defined.
+
     --help
         Print the help menu.
 
@@ -43,11 +52,11 @@ CONFIGURATION
     Defined commands are run as arguments to "watch". Multiple commands are
     run in the order they're passed.
 
-     $ watch example another_example
+     $ watch --run example --run another_example
      (will run example, then another_example)
 
   EXAMPLES
-   Run two commands when changes are detected
+   Run two specific commands when changes are detected
      # create a .watch file in the directory to watch
      ~/git/example $ vi .watch
      [ignore]
@@ -57,15 +66,16 @@ CONFIGURATION
      [command]
      example=echo 'this is an example command'
      another_example=echo 'this is another example command'
+     yet_another_example=echo 'this is yet another example command'
 
      # run watch, specifying both commands to run as defined in the .watch file
-      ~/git/example $ watch example another_example
+      ~/git/example $ watch --run example --run another_example
      [1617588530][ignore]: scratch,testing
      [1617588530][ignore]: tmp,t
      [1617588530][watch]: /home/blaine/git/example
 
      # when any non-ignored files or directories change (or new are created),
-     # each of the specified commands are run.
+     # each of the specified commands are run (but not the yet_another_example command)
 
      [1617588661][modify]: /home/blaine/git/example/lib/example.pm
      [1617588661][run example]: echo 'this is an example command'

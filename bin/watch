@@ -11,6 +11,7 @@ use Config::Tiny ();
 
 Getopt::Long::GetOptions(
     \my %opt,
+    'run=s@',
     'help',
 ) or Pod::Usage::pod2usage( -exitval => 1 );
 
@@ -18,14 +19,15 @@ if ($opt{help}) {
     Pod::Usage::pod2usage( -exitval => 0 );
 }
 
-Pod::Usage::pod2usage( -message => 'Argument command is required', -exitval => 1 )
-    unless @ARGV;
+unless ($opt{run}) {
+    Pod::Usage::pod2usage( -message => 'Option run is required', -exitval => 1 );
+}
 
 my $dir    = Cwd::getcwd();
 my $config = load_config($dir);
 
 my $commands = [];
-foreach my $key (@ARGV) {
+foreach my $key (@{$opt{run}}) {
     Pod::Usage::pod2usage( -message => "Argument $key is not a defined command", -exitval => 1 )
         unless defined $config->{command}{$key};
 
@@ -124,7 +126,8 @@ watch - run commands when files change
 
 =head1 SYNOPSIS
 
- watch <command> [--help]
+ watch [--run <command>]
+       [--help]
 
 =head1 DESCRIPTION
 
@@ -138,6 +141,14 @@ file within the current working directory.
 =head1 OPTIONS
 
 =over
+
+=item --run <command>
+
+Defines which commands to run on changes.
+
+The C<command> specified must be defined in the C<.watch> configuration file.
+
+Multiple C<--run> options may be defined.
 
 =item --help
 
@@ -172,15 +183,15 @@ argument is passed.
  example=echo 'this is an example command'
  another_example=echo 'this is another example command'
 
-Defined commands are run as arguments to C<watch>.  Multiple commands are
+Defined commands are run as arguments to "watch". Multiple commands are
 run in the order they're passed.
 
- $ watch example another_example
+ $ watch --run example --run another_example
  (will run example, then another_example)
 
 =head2 EXAMPLES
 
-=head3 Run two commands when changes are detected
+=head3 Run two specific commands when changes are detected
 
  # create a .watch file in the directory to watch
  ~/git/example $ vi .watch
@@ -191,15 +202,16 @@ run in the order they're passed.
  [command]
  example=echo 'this is an example command'
  another_example=echo 'this is another example command'
+ yet_another_example=echo 'this is yet another example command'
 
  # run watch, specifying both commands to run as defined in the .watch file
-  ~/git/example $ watch example another_example
+  ~/git/example $ watch --run example --run another_example
  [1617588530][ignore]: scratch,testing
  [1617588530][ignore]: tmp,t
  [1617588530][watch]: /home/blaine/git/example
 
  # when any non-ignored files or directories change (or new are created),
- # each of the specified commands are run.
+ # each of the specified commands are run (but not the yet_another_example command)
 
  [1617588661][modify]: /home/blaine/git/example/lib/example.pm
  [1617588661][run example]: echo 'this is an example command'
