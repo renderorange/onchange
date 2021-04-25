@@ -1,23 +1,23 @@
 NAME
-    watch - run commands when files change
+    onchange - run commands when files change
 
 SYNOPSIS
-     watch [--run <command>]
-           [--help]
+     onchange [--run <command>]
+              [--help]
 
 DESCRIPTION
-    "watch" is a program that watches for changes to files and directories
-    then runs configured sets of commands.
+    "onchange" is a program that watches for changes to files and
+    directories then runs configured sets of commands.
 
-    "watch" detects changes recursively within the current working
+    "onchange" detects changes recursively within the current working
     directory. Files/directories to ignore and commands to run are read from
-    the ".watch" file within the current working directory.
+    the ".onchange" file within the current working directory.
 
 OPTIONS
     --run <command>
         Defines which commands to run on changes.
 
-        The "command" specified must be defined in the ".watch"
+        The "command" specified must be defined in the ".onchange"
         configuration file.
 
         Multiple "--run" options may be defined.
@@ -49,16 +49,16 @@ CONFIGURATION
      example=echo 'this is an example command'
      another_example=echo 'this is another example command'
 
-    Defined commands are run as arguments to "watch". Multiple commands are
-    run in the order they're passed.
+    Defined commands are run as arguments to "onchange". Multiple commands
+    are run in the order they're passed.
 
-     $ watch --run example --run another_example
+     $ onchange --run example --run another_example
      (will run example, then another_example)
 
   EXAMPLES
    Run two specific commands when changes are detected
-     # create a .watch file in the directory to watch
-     ~/git/example $ vi .watch
+     # create a .onchange file in the directory to watch
+     ~/git/example $ vi .onchange
      [ignore]
      dirs=tmp, t
      files=scratch, testing
@@ -68,8 +68,8 @@ CONFIGURATION
      another_example=echo 'this is another example command'
      yet_another_example=echo 'this is yet another example command'
 
-     # run watch, specifying both commands to run as defined in the .watch file
-      ~/git/example $ watch --run example --run another_example
+     # run onchange, specifying both commands to run as defined in the .onchange file
+      ~/git/example $ onchange --run example --run another_example
      [1617588530][ignore]: scratch,testing
      [1617588530][ignore]: tmp,t
      [1617588530][watch]: /home/blaine/git/example
