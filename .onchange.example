@@ -1,6 +1,7 @@
 [ignore]
 dirs=blib, tmp
 files=pm_to_blib, scratch
+file=kitties
 
 [command]
 example=echo 'this is an example command'
