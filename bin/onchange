@@ -45,11 +45,9 @@ foreach my $key ( keys %{$config->{ignore}} ) {
     $string =~ s/\s+//g;
     logger( "ignore", $string );
 
-    my @ignores;
     if ( $string =~ /,/ ) {
-        @ignores = split /,/, $string;
+        push @{$exclude}, map { qr($dir_exclude$_) } split /,/, $string;
     }
-    push @{$exclude}, map { qr($dir_exclude$_) } @ignores;
 }
 
 my $watcher =
