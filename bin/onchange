@@ -187,12 +187,12 @@ Print the help menu.
 
 The C<ignore> section key.
 
-Keys within this section define additional file or directory names to
-ignore.
+Values within this section define which file and directory names to ignore.
 
-Multiple file or directory names can be defined per line if separated by
+Multiple file and directory names can be defined per line if separated by
 comma.
 
+ # updates to tmp, t, scratch, and testing, will not trigger running commands
  [ignore]
  dirs=tmp, t
  files=scratch, testing
@@ -201,8 +201,10 @@ comma.
 
 The C<command> section key.
 
-Keys within this section define what command to run when that command
-argument is passed.
+Keys within this section name the command to run when that command argument
+is passed.
+
+The value for each command key defines the command to run.
 
  [command]
  example=echo 'this is an example command'
@@ -218,8 +220,10 @@ run in the order they're passed.
 
 The C<set> section key.
 
-Keys within this section define sets of commands to run when that set
+Keys within this section name the sets of commands to run when that set
 argument is passed.
+
+The value of each set key defines the command or list of commands to run.
 
  [command]
  example=echo 'this is an example command'
@@ -231,8 +235,10 @@ argument is passed.
 
 Multiple commands can be defined per line if separated by comma.
 
-Defined commands are run as arguments to C<onchange>. Multiple commands are
-run in the order they're passed.
+Defined sets are run as arguments to C<onchange>. Multiple set are run
+in the order they're passed.
+
+Sets and commands can both be passed to be run.
 
  $ onchange --run examples --run yet_another_example
  (will run example, then another_example, then yet_another_example)
