@@ -112,6 +112,17 @@ sub load_config {
         }
     }
 
+    foreach my $set ( keys %{$config->{set}} ) {
+        my $string = $config->{set}{$set};
+        $string =~ s/\s+//g;
+
+        foreach my $command ( extract_list($string) ) {
+            unless ( defined $config->{command}{$command} ) {
+                logger( "fatal", "set '$set' defines a nonexistent command, '$command'" );
+            }
+        }
+    }
+
     return $config;
 }
 
