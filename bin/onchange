@@ -101,14 +101,14 @@ sub load_config {
     my $rc  = "$dir/.onchange";
 
     unless ( -e $rc && -r $rc ) {
-        die "$0: $rc does not exist or cannot be read\n";
+        logger( "fatal", "$rc does not exist or cannot be read" );
     }
 
     my $config = Config::Tiny->read($rc);
 
     foreach my $required (qw{ command }) {
         unless ( defined $config->{$required} ) {
-            die "$0: $required section in $rc is required\n";
+            logger( "fatal", "$required section in $rc is required" );
         }
     }
 
