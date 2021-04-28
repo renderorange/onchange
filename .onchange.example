@@ -6,3 +6,7 @@ file=testing
 [command]
 example=echo 'this is an example command'
 another_example=echo 'this is another example command'
+yet_another_example=echo 'this is not included in set examples'
+
+[set]
+examples=example, another_example

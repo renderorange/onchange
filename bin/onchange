@@ -28,10 +28,20 @@ my $config = load_config($dir);
 
 my $commands = [];
 foreach my $key (@{$opt{run}}) {
-    Pod::Usage::pod2usage( -message => "Argument $key is not a defined command", -exitval => 1 )
-        unless defined $config->{command}{$key};
+    Pod::Usage::pod2usage( -message => "Argument $key is not a defined command or set", -exitval => 1 )
+        unless ( defined $config->{command}{$key} || defined $config->{set}{$key} );
 
-    push @{$commands}, { $key => $config->{command}{$key} };
+    if ( defined $config->{command}{$key} ) {
+        push @{$commands}, { $key => $config->{command}{$key} };
+    }
+
+    if ( defined $config->{set}{$key} ) {
+        my $string = $config->{set}{$key};
+        $string =~ s/\s+//g;
+        push @{$commands},
+            map +( { $_ => $config->{command}{$_} } ),
+            extract_list($string);
+    }
 }
 
 my $dir_exclude = $dir . "/(?:.+\/)?";
@@ -47,7 +57,7 @@ foreach my $key ( keys %{$config->{ignore}} ) {
 
     push @{$exclude},
         map { qr($dir_exclude$_) }
-        ( $string =~ /,/ ? split /,/, $string : $string );
+        extract_list($string);
 }
 
 my $watcher =
@@ -65,6 +75,12 @@ while ( my @events = $watcher->wait_for_events ) {
 }
 
 exit 0;
+
+sub extract_list {
+    my $string = shift;
+
+    return ( $string =~ /,/ ? split /,/, $string : $string );
+}
 
 sub logger {
     my $event = shift;
@@ -124,13 +140,13 @@ onchange - run commands when files change
 
 =head1 SYNOPSIS
 
- onchange [--run <command>]
+ onchange [--run <command|set>]
           [--help]
 
 =head1 DESCRIPTION
 
 C<onchange> is a program that watches for changes to files and directories
-then runs configured sets of commands.
+then runs configured commands.
 
 C<onchange> detects changes recursively within the current working directory.
 Files/directories to ignore and commands to run are read from the C<.onchange>
@@ -140,13 +156,13 @@ file within the current working directory.
 
 =over
 
-=item --run <command>
+=item --run <command|set>
 
-Defines which commands to run on changes.
+Defines which command or set to run on changes.
 
-The C<command> specified must be defined in the C<.onchange> configuration file.
+The C<command> or C<set> specified must be defined in the C<.onchange> configuration file.
 
-Multiple C<--run> options may be defined.
+Multiple C<--run> options may be defined and are run in the order they're passed.
 
 =item --help
 
@@ -181,11 +197,34 @@ argument is passed.
  example=echo 'this is an example command'
  another_example=echo 'this is another example command'
 
-Defined commands are run as arguments to "onchange". Multiple commands are
+Defined commands are run as arguments to C<onchange>. Multiple commands are
 run in the order they're passed.
 
  $ onchange --run example --run another_example
  (will run example, then another_example)
+
+=head2 set
+
+The C<set> section key.
+
+Keys within this section define sets of commands to run when that set
+argument is passed.
+
+ [command]
+ example=echo 'this is an example command'
+ another_example=echo 'this is another example command'
+ yet_another_example=echo 'this is not included in set examples'
+
+ [set]
+ examples=example, another_example
+
+Multiple commands can be defined per line if separated by comma.
+
+Defined commands are run as arguments to C<onchange>. Multiple commands are
+run in the order they're passed.
+
+ $ onchange --run examples --run yet_another_example
+ (will run example, then another_example, then yet_another_example)
 
 =head2 EXAMPLES
 
@@ -200,10 +239,13 @@ run in the order they're passed.
  [command]
  example=echo 'this is an example command'
  another_example=echo 'this is another example command'
- yet_another_example=echo 'this is yet another example command'
+ yet_another_example=echo 'this is not included in set examples'
+
+ [set]
+ examples=example, another_example
 
  # run onchange, specifying both commands to run as defined in the .onchange file
-  ~/git/example $ onchange --run example --run another_example
+ ~/git/example $ onchange --run example --run another_example
  [1617588530][ignore]: scratch,testing
  [1617588530][ignore]: tmp,t
  [1617588530][watch]: /home/blaine/git/example
@@ -221,5 +263,20 @@ run in the order they're passed.
  this is an example command
  [1617588707][run another_example]: echo 'this is another example command'
  this is another example command
+
+=head3 Run a set of commands and one specific command when changes are detected
+
+ # with the following commands and set in the .onchange file
+ [command]
+ example=echo 'this is an example command'
+ another_example=echo 'this is another example command'
+ yet_another_example=echo 'this is not included in set examples'
+
+ [set]
+ examples=example, another_example
+
+ # run onchange, specifying the set and additional command to run
+ ~/git/example $ onchange --run examples --run yet_another_example
+ (will run example, then another_example, then yet_another_example)
 
 =cut

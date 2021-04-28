@@ -2,25 +2,26 @@ NAME
     onchange - run commands when files change
 
 SYNOPSIS
-     onchange [--run <command>]
+     onchange [--run <command|set>]
               [--help]
 
 DESCRIPTION
     "onchange" is a program that watches for changes to files and
-    directories then runs configured sets of commands.
+    directories then runs configured commands.
 
     "onchange" detects changes recursively within the current working
     directory. Files/directories to ignore and commands to run are read from
     the ".onchange" file within the current working directory.
 
 OPTIONS
-    --run <command>
-        Defines which commands to run on changes.
+    --run <command|set>
+        Defines which command or set to run on changes.
 
-        The "command" specified must be defined in the ".onchange"
+        The "command" or "set" specified must be defined in the ".onchange"
         configuration file.
 
-        Multiple "--run" options may be defined.
+        Multiple "--run" options may be defined and are run in the order
+        they're passed.
 
     --help
         Print the help menu.
@@ -55,6 +56,28 @@ CONFIGURATION
      $ onchange --run example --run another_example
      (will run example, then another_example)
 
+  set
+    The "set" section key.
+
+    Keys within this section define sets of commands to run when that set
+    argument is passed.
+
+     [command]
+     example=echo 'this is an example command'
+     another_example=echo 'this is another example command'
+     yet_another_example=echo 'this is not included in set examples'
+
+     [set]
+     examples=example, another_example
+
+    Multiple commands can be defined per line if separated by comma.
+
+    Defined commands are run as arguments to "onchange". Multiple commands
+    are run in the order they're passed.
+
+     $ onchange --run examples --run yet_another_example
+     (will run example, then another_example, then yet_another_example)
+
   EXAMPLES
    Run two specific commands when changes are detected
      # create a .onchange file in the directory to watch
@@ -66,10 +89,13 @@ CONFIGURATION
      [command]
      example=echo 'this is an example command'
      another_example=echo 'this is another example command'
-     yet_another_example=echo 'this is yet another example command'
+     yet_another_example=echo 'this is not included in set examples'
+
+     [set]
+     examples=example, another_example
 
      # run onchange, specifying both commands to run as defined in the .onchange file
-      ~/git/example $ onchange --run example --run another_example
+     ~/git/example $ onchange --run example --run another_example
      [1617588530][ignore]: scratch,testing
      [1617588530][ignore]: tmp,t
      [1617588530][watch]: /home/blaine/git/example
@@ -87,4 +113,18 @@ CONFIGURATION
      this is an example command
      [1617588707][run another_example]: echo 'this is another example command'
      this is another example command
+
+   Run a set of commands and one specific command when changes are detected
+     # with the following commands and set in the .onchange file
+     [command]
+     example=echo 'this is an example command'
+     another_example=echo 'this is another example command'
+     yet_another_example=echo 'this is not included in set examples'
+
+     [set]
+     examples=example, another_example
+
+     # run onchange, specifying the set and additional command to run
+     ~/git/example $ onchange --run examples --run yet_another_example
+     (will run example, then another_example, then yet_another_example)
 
